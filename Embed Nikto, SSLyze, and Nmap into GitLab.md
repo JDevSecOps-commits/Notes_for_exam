@@ -1,0 +1,147 @@
+# DevSecOps-Pro
+Notes for future / Exam
+
+> Embed the DAST TOOLS
+```bash
+image: docker:latest  # To run all jobs in this pipeline, use a latest docker image
+
+services:
+  - docker:dind       # To run all jobs in this pipeline, use a docker image which contains a docker daemon running inside (dind - docker in docker). Reference: https://forum.gitlab.com/t/why-services-docker-dind-is-needed-while-already-having-image-docker/43534
+
+stages:
+  - build
+  - test
+  - release
+  - preprod
+  - integration
+  - prod
+
+build:
+  stage: build
+  image: python:3.6
+  before_script:
+   - pip3 install --upgrade virtualenv
+  script:
+   - virtualenv env                       # Create a virtual environment for the python application
+   - source env/bin/activate              # Activate the virtual environment
+   - pip install -r requirements.txt      # Install the required third party packages as defined in requirements.txt
+   - python manage.py check               # Run checks to ensure the application is working fine
+
+test:
+  stage: test
+  image: python:3.6
+  before_script:
+   - pip3 install --upgrade virtualenv
+  script:
+   - virtualenv env
+   - source env/bin/activate
+   - pip install -r requirements.txt
+   - python manage.py test taskManager
+
+nikto:
+  stage: integration
+  script:
+    - docker pull hysnsec/nikto
+    - docker run --rm -v $(pwd):/tmp hysnsec/nikto -h http://prod-eggkd08x.lab.practical-devsecops.training -o /tmp/nikto-output.xml
+  artifacts:
+    paths: [nikto-output.xml]
+    when: always
+
+sslscan:
+  stage: integration
+  script:
+    - docker pull hysnsec/sslyze
+    - docker run --rm -v $(pwd):/tmp hysnsec/sslyze prod-eggkd08x.lab.practical-devsecops.training:443 --json_out /tmp/sslyze-output.json
+  artifacts:
+    paths: [sslyze-output.json]
+    when: always
+
+nmap:
+  stage: integration
+  script:
+    - docker pull hysnsec/nmap
+    - docker run --rm -v $(pwd):/tmp hysnsec/nmap prod-eggkd08x -oX /tmp/nmap-output.xml
+  artifacts:
+    paths: [nmap-output.xml]
+    when: always
+
+prod:
+  stage: prod
+  script:
+    - echo "This is a deploy step."
+  when: manual # Continuous Delivery
+  ```
+
+>Embed DAST Tool with allow failure 
+```bash
+image: docker:latest  # To run all jobs in this pipeline, use a latest docker image
+
+services:
+  - docker:dind       # To run all jobs in this pipeline, use a docker image which contains a docker daemon running inside (dind - docker in docker). Reference: https://forum.gitlab.com/t/why-services-docker-dind-is-needed-while-already-having-image-docker/43534
+
+stages:
+  - build
+  - test
+  - release
+  - preprod
+  - integration
+  - prod
+
+build:
+  stage: build
+  image: python:3.6
+  before_script:
+   - pip3 install --upgrade virtualenv
+  script:
+   - virtualenv env                       # Create a virtual environment for the python application
+   - source env/bin/activate              # Activate the virtual environment
+   - pip install -r requirements.txt      # Install the required third party packages as defined in requirements.txt
+   - python manage.py check               # Run checks to ensure the application is working fine
+
+test:
+  stage: test
+  image: python:3.6
+  before_script:
+   - pip3 install --upgrade virtualenv
+  script:
+   - virtualenv env
+   - source env/bin/activate
+   - pip install -r requirements.txt
+   - python manage.py test taskManager
+
+nikto:
+  stage: integration
+  script:
+    - docker pull hysnsec/nikto
+    - docker run --rm -v $(pwd):/tmp hysnsec/nikto -h http://prod-eggkd08x.lab.practical-devsecops.training -o /tmp/nikto-output.xml
+  artifacts:
+    paths: [nikto-output.xml]
+    when: always
+  allow_failure: true
+
+sslscan:
+  stage: integration
+  script:
+    - docker pull hysnsec/sslyze
+    - docker run --rm -v $(pwd):/tmp hysnsec/sslyze prod-eggkd08x.lab.practical-devsecops.training:443 --json_out /tmp/sslyze-output.json
+  artifacts:
+    paths: [sslyze-output.json]
+    when: always
+  allow_failure: true
+
+nmap:
+  stage: integration
+  script:
+    - docker pull hysnsec/nmap
+    - docker run --rm -v $(pwd):/tmp hysnsec/nmap prod-eggkd08x -oX /tmp/nmap-output.xml
+  artifacts:
+    paths: [nmap-output.xml]
+    when: always
+  allow_failure: true
+
+prod:
+  stage: prod
+  script:
+    - echo "This is a deploy step."
+  when: manual # Continuous Delivery
+  ```
