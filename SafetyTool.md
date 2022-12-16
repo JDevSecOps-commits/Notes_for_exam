@@ -22,3 +22,9 @@ safety check -r requirements.txt --json | tee safety-output.json
 
 - docker run --rm -v $(pwd):/src hysnsec/safety check -r requirements.txt --json > oast-results.json
 ```
+>Fix
+```
+cat >requirements.txt<<EOF
+Django~=2.2.25
+EOF
+```
