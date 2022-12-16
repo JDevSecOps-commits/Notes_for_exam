@@ -45,3 +45,16 @@ retire --severity high --ignorefile .retireignore.json --outputformat json --out
 ```
 install retire js
 npm install -g retire
+
+
+>Git Trufflehog
+```git-secrets:
+  stage: build
+  script:
+    - docker run -v $(pwd):/src --rm hysnsec/trufflehog --repo_path /src file:///src --json | tee trufflehog-output.json
+  artifacts:
+    paths: [trufflehog-output.json]
+    when: always  # What is this for?
+    expire_in: one week
+    
+  ```
