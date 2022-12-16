@@ -14,3 +14,9 @@ safety check --help
 ```bash 
 safety check -r requirements.txt --json | tee safety-output.json
 ```
+
+-r flag used to specify the input
+
+--json flag tells that output should be in JSON format
+
+- docker run --rm -v $(pwd):/src hysnsec/safety check -r requirements.txt --json > oast-results.json
