@@ -74,3 +74,11 @@ prod:
     - echo "This is a deploy step."
   when: manual # Continuous Delivery
  ```
+
+
+Exclude issues as False Positives in Bandit:
+
+1. # nosec - add to every line in source code that bandit flags as security issue - false positive only
+2. baseline - json file. Any issue that is added to baseline file will be ingnored as False Positives by Bandit
+
+
