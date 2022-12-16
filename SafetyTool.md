@@ -41,3 +41,7 @@ EOF
 retire --severity high --ignorefile .retireignore.json --outputformat json --outputpath retire_output.json
 
 ```
+> retire js
+```
+install retire js
+npm install -g retire
