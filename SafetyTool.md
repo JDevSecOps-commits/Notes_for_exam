@@ -28,3 +28,10 @@ cat >requirements.txt<<EOF
 Django~=2.2.25
 EOF
 ```
+
+> Retire js
+```
+--outputpath : flag specifies the output file path.
+--outputformat : flag specifies that output format. Here it’s the JSON format.
+
+```
