@@ -35,3 +35,9 @@ EOF
 --outputformat : flag specifies that output format. Here it’s the JSON format.
 
 ```
+
+> Ignore file
+```
+retire --severity high --ignorefile .retireignore.json --outputformat json --outputpath retire_output.json
+
+```
