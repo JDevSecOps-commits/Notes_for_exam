@@ -58,3 +58,8 @@ npm install -g retire
     expire_in: one week
     
   ```
+  
+  >Bandit
+  ```
+  bandit -r . -f json | tee bandit-output.json
+  ```
