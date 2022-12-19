@@ -65,5 +65,8 @@ EOL
 ```bash
 ansible-playbook -i inventory.ini playbook.yml
 ```
-
+> Capture Key signatures to input into known_hosts file
+```bash
+ssh-keyscan -t rsa sandbox-z3l8hs55 devsecops-box-z3l8hs55 >> ~/.ssh/known_hosts
+```
 
