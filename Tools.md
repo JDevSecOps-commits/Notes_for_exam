@@ -67,3 +67,15 @@ Trufflehog
 ```bash
 TruflleHog is a tool that searches through git repositories for secrets, digging deep into commit history and branches. This tool is useful in finding the secrets accidentally committed to the repo.
 ```
+
+>Stuff
+```bash
+git-secrets:
+  stage: build
+  script:
+    - docker run -v $(pwd):/src --rm hysnsec/trufflehog --repo_path /src file:///src --json | tee trufflehog-output.json
+  artifacts:
+    paths: [trufflehog-output.json]
+    when: always  # What is this for?
+    expire_in: one week
+```
