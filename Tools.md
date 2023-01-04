@@ -55,3 +55,12 @@ If npm is installed, it will process package.json and will ignore requirements.t
 
 If pip is installed on the machine, it will process requirements.txt. It won't process package.json or error out.
 ```
+
+>STA Tools
+```bash
+Bandit
+Brakeman
+Trufflehog
+
+```
+
