@@ -5,7 +5,7 @@
 
 Nmap
 
-```bash
+```
 nmap scans ports and network
 ```
 
