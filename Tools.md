@@ -3,10 +3,10 @@
 >Safety checks Python dependencies for known security vulnerabilities and suggests the proper remediations for vulnerabilities detected.
 ```
 
-Nmap
-
+>Nmap
+>```bash
+>Nmap scans ports and network
 ```
-nmap scans ports and network
 ```
 
 >Ansible
