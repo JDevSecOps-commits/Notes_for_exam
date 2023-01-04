@@ -18,3 +18,8 @@
 ```bash
 >SSLyze checks SSL security
 ```
+
+>Software Component Analysis
+```bash
+Software Component Analysis is a technique used to find vulns in third-party components
+```
