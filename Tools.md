@@ -3,7 +3,7 @@
 >Safety checks Python dependencies for known security vulnerabilities and suggests the proper remediations for vulnerabilities detected.
 ```
 
->nmap
+>Nmap
 ```bash
 >nmap scans ports and network
 ```
