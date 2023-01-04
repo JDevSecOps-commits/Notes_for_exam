@@ -63,4 +63,7 @@ Brakeman
 Trufflehog
 
 ```
-
+>Trufflehog
+```bash
+TruflleHog is a tool that searches through git repositories for secrets, digging deep into commit history and branches. This tool is useful in finding the secrets accidentally committed to the repo.
+```
