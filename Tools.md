@@ -79,3 +79,11 @@ git-secrets:
     when: always  # What is this for?
     expire_in: one week
 ```
+
+>DAST Tools
+```bash
+ZAP
+Burp Suite
+Nikto
+Nmap
+```
