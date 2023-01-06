@@ -1,3 +1,18 @@
+>SCA
+```bash
+?
+```
+
+>SAST Tools
+```bash
+?
+```
+
+>OAST Tools
+```bash?
+```
+
+
 >Safety
 >```bash
 >Safety checks Python dependencies for known security vulnerabilities and suggests the proper remediations for vulnerabilities detected.
