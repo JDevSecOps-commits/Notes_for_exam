@@ -82,3 +82,11 @@ Exclude issues as False Positives in Bandit:
 2. baseline - json file. Any issue that is added to baseline file will be ingnored as False Positives by Bandit
 
 
+
+```bash
+install bandit - pip3 install bandit==1.7.4
+```
+```bash
+store bandit results - bandit -r . -f json | tee bandit-output.json
+docker run --user $(id -u):$(id -g) -v $(pwd):/src --rm hysnsec/bandit -r /src -f json -o /src/bandit-output.json
+```
