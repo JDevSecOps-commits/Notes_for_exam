@@ -103,3 +103,11 @@ inspec:
   script:
     - docker run --rm -v ~/.ssh:/root/.ssh -v $(pwd):/share hysnsec/inspec exec https://github.com/dev-sec/linux-baseline -t ssh://root@$DEPLOYMENT_SERVER -i ~/.ssh/id_rsa --chef-license accept
 ```
+
+
+>Bandit
+```bash
+The Bandit is a tool designed to find common security issues in Python code.
+
+To do this Bandit, processes each file, builds an AST, and runs appropriate plugins against the AST nodes. Once Bandit has finished scanning all the files it generates a report.
+```
