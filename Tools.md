@@ -1,15 +1,21 @@
 >SCA
 ```bash
-?
+Software Component Analysis is a software technique to find security vulns in third-party projects
+Static Analysis technique
 ```
 
 >SAST Tools
 ```bash
-?
+Retirejs - 
+Safety - 
+Bunlder Audit - 
+Compsoer - 
+OWASP Dependency Checker - 
 ```
 
->OAST Tools
-```bash?
+>OAST Tools - Component Analysis
+```bash
+
 ```
 
 
