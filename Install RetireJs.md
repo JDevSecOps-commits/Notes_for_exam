@@ -12,3 +12,8 @@ apt install nodejs -y
 ```bash
 npm install -g retire@3.0.6
 ```
+
+>Run scan
+```bash
+retire --outputformat json --outputpath retire_output.json
+```
