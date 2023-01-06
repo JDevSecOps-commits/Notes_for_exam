@@ -6,7 +6,7 @@ Static Analysis technique
 
 >SAST Tools
 ```bash
-Retirejs - 
+Retirejs - detects vuln javascript libraries
 Safety - 
 Bunlder Audit - 
 Compsoer - 
