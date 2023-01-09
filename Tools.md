@@ -1,7 +1,39 @@
+>Tools of the Trade
+```bash
+
+Basics
+
+
+  CI/CD - Continous Integration/Continous Delivery:-
+  
+  Source Code Managment - Version Control Systems - Gitlab Ci/CD
+  Artifact Management - maintain tightly auditable and deployable artifacts
+  Docker Registry - store and retreive Docker images (deploy artifacts)
+  IaC - Infrastructure as Code - Terraform, Ansible
+  Monitoring - various checks such as database, cpu, RAM usage regular checks for ROI.
+    
+```
+
+>Docker
+```bash
+
+Image - tar or zip file explaing how a container can be created from the image
+Container - running image
+Registry - place to store and retreive docker image
+Repository - place to store a particular image and its version in a registry 
+
+
+
+
 >SCA
 ```bash
 Software Component Analysis is a software technique to find security vulns in third-party projects
-Static Analysis technique
+Static Analysis technique aka Software Component Analysis
+
+**SCA Tools**
+
+>retirejs
+
 
   >Frontend
   retirejs - npm install -g retire # Install retirejs npm package
