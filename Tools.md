@@ -20,10 +20,8 @@ Basics
 Image - tar or zip file explaing how a container can be created from the image
 Container - running image
 Registry - place to store and retreive docker image
-Repository - place to store a particular image and its version in a registry 
-
-
-
+Repository - place to store a particular image and its version in a registry
+```
 
 >SCA
 ```bash
@@ -32,15 +30,15 @@ Static Analysis technique aka Software Component Analysis
 
 **SCA Tools**
 
->retirejs
-
-
+retirejs
   >Frontend
   retirejs - npm install -g retire # Install retirejs npm package
   retire --outputformat json --outputpath retirejs-report.json --severity high
   
   >Backend
   safety - docker run --rm -v $(pwd):/src hysnsec/safety check -r requirements.txt --json > oast-results.json
+  
+>
 ```
 
 >SAST Tools
