@@ -69,8 +69,11 @@ Scans source code, binary and byte code without running the code
 >Bandit
 ?
 >
->Brakema
+>Brakeman
 ?
+>
+>Trufflehog
+Secrets Scanning
 >
 
 
