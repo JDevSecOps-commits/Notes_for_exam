@@ -2,8 +2,7 @@
 ``` bash
 > Safety checks your installed dependencies for known security vulnerabilities
 ```
-# DevSecOps-Pro
-Notes for future / Exam
+
 >Install Safety Tool
 ```bash
 pip3 install safety==2.1.1
