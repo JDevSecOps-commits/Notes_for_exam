@@ -77,3 +77,14 @@ docker volume create data
 ```bash
 docker run --name volumemount -v data:/src ubuntu:18.04 "/bin/bash" "-c" "echo test>>/src/hello.txt"
 ```
+
+> Login to docker when using Gitlab
+```bash
+release:
+  stage: release
+  before_script:
+   - echo $CI_REGISTRY_PASS | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  script:
+   - docker build -t $CI_REGISTRY/root/django-nv .   # Build the application into Docker image
+   - docker push $CI_REGISTRY/root/django-nv         # Push the image into registry
+```
