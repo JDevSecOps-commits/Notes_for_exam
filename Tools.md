@@ -57,28 +57,24 @@ Detects known vulns in Javascript libraries
 Safety
   >
   Scans known vulns issues in python packages
+  safety - docker run --rm -v $(pwd):/src hysnsec/safety check -r requirements.txt --json > oast-results.json
   >
-Blunder Audit
-  >
-  ?
-  >
-Compsoer
->
-?
->
 ```
-
+>SAST Info
+```bash
+Scans source code, binary and byte code without running the code
+```
 >SAST Tools
 ```bash
+>Bandit
+?
+>
+>Brakema
+?
+>
 
->Trufflehog
-secres-scanning - docker run --rm -v $(pwd):/src hysnsec/trufflehog file:///src --json | tee trufflehog-output.json
-code analysis - docker run --user $(id -u):$(id -g) --rm -v $(pwd):/src hysnsec/bandit -r /src -f json -o /src/bandit-output.json
-Safety - 
-Bunlder Audit - 
-Compsoer - 
-OWASP Dependency Checker - 
-```
+![image](https://user-images.githubusercontent.com/120670055/211567285-93ad8088-dae0-4d57-b03b-c125dffa38eb.png)
+
 
 >DAST
 ```bash
