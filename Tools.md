@@ -75,7 +75,7 @@ Scans source code, binary and byte code without running the code
 >Trufflehog
 Secrets Scanning
 >
-
+```
 
 >DAST
 ```bash
@@ -89,10 +89,7 @@ docker run --rm -v $(pwd):/tmp hysnsec/nmap prod-xcs30z62 -oX /tmp/nmap-output.x
 >ZAP Baseline
 docker run --user $(id -u):$(id -g) -w /zap -v $(pwd):/zap/wrk:rw --rm owasp/zap2docker-stable:2.10.0 zap-baseline.py -t https://prod-xcs30z62.lab.practical-devsecops.training -J zap-output.json
 
->OAST Tools - Component Analysis
-```bash
 
-```
 >Notes
 ```bash
 image: docker:latest
@@ -217,40 +214,6 @@ zap-baseline:
     when: always # What does this do?
   allow_failure: false
   ```
-
->Safety
->```bash
->Safety checks Python dependencies for known security vulnerabilities and suggests the proper remediations for vulnerabilities detected.
-```
-
-
->Nmap
-```bash
-Nmap scans ports and network
-```
-
-
->Ansible
-```bash
->Ansible manages servers
-```
-
->SSLyze
-```bash
->SSLyze checks SSL security
-```
-
->Software Component Analysis
-```bash
-Software Component Analysis is a technique used to find vulns in third-party components
-```
->OAST TOOLS
-```bash
-retirejs
-Safety
-Bulnder Audit
-Composer
-```
 
 >Info
 ```bash
