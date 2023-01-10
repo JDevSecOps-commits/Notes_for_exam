@@ -114,3 +114,20 @@ zap-baseline:
     when: always # What does this do?
   allow_failure: false
 ```
+
+>Info
+```bash
+dast-zap:
+  stage: integration
+  before_script:
+    - apk add py-pip py-requests
+    - docker pull owasp/zap2docker-stable:2.10.0
+  script:
+    - docker run --user $(id -u):$(id -g) -w /zap -v $(pwd):/zap/wrk:rw --rm owasp/zap2docker-stable:2.10.0 zap-baseline.py -t https://prod-xcs30z62.lab.practical-devsecops.training -d -x zap-output.xml
+  after_script:
+    - python3 upload-results.py --host $DOJO_HOST --api_key $DOJO_API_TOKEN --engagement_id 1 --product_id 1 --lead_id 1 --environment "Production" --result_file zap-output.xml --scanner "ZAP Scan"
+  artifacts:
+    paths: [zap-output.xml]
+    when: always
+    expire_in: 1 day
+```
