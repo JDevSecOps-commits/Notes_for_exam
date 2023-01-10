@@ -11,7 +11,17 @@ Basics
   Docker Registry - store and retreive Docker images (deploy artifacts)
   IaC - Infrastructure as Code - Terraform, Ansible
   Monitoring - various checks such as database, cpu, RAM usage regular checks for ROI.
-    
+  
+Rules
+>
+Rules:if - 
+If no attributes are defined in rules clause, the defaults are when: on_success and allow_failure: false. That is by default execute this job when the previous jobs in earlier stages succeeded (when: on_success), and fail the entire build if this job fails to run (allow_failure: false).
+
+Rules:changes - job should only run when something is changed
+
+Rules:exists - is file exists
+
+Rules:allow_failure: - 
 ```
 
 >Docker
@@ -28,11 +38,14 @@ Repository - place to store a particular image and its version in a registry
 Software Component Analysis is a software technique to find security vulns in third-party projects
 Static Analysis technique aka Software Component Analysis
 
-Used oon third-party components, internal developed components and docker containers
+Used on third-party components, internal developed components and docker containers
 
 **SCA Tools**
 
-retirejs
+Retirejs
+>
+Detects known vulns in Javascript libraries
+>
   >Frontend
   retirejs - npm install -g retire # Install retirejs npm package
   retire --outputformat json --outputpath retirejs-report.json --severity high
@@ -43,6 +56,7 @@ retirejs
  
 Safety
   >
+  Scans known vulns issues in python packages
   >
 Blunder Audit
   >
