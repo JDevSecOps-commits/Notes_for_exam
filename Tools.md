@@ -73,8 +73,6 @@ Scans source code, binary and byte code without running the code
 ?
 >
 
-![image](https://user-images.githubusercontent.com/120670055/211567285-93ad8088-dae0-4d57-b03b-c125dffa38eb.png)
-
 
 >DAST
 ```bash
