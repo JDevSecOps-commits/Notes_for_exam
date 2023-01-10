@@ -88,3 +88,29 @@ release:
    - docker build -t $CI_REGISTRY/root/django-nv .   # Build the application into Docker image
    - docker push $CI_REGISTRY/root/django-nv         # Push the image into registry
 ```
+
+> SSh into prod machine and set up Docker
+```bash
+prod:
+  stage: prod
+  image: kroniak/ssh-client:3.6
+  environment: production
+  only:
+      - master
+  before_script:
+   - mkdir -p ~/.ssh
+   - echo "$PROD_SSH_PRIVKEY" > ~/.ssh/id_rsa
+   - chmod 600 ~/.ssh/id_rsa
+   - eval "$(ssh-agent -s)"
+   - ssh-add ~/.ssh/id_rsa
+   - ssh-keyscan -t rsa $PROD_HOST >> ~/.ssh/known_hosts
+  script:
+   - echo
+   - |
+      ssh root@$PROD_HOST << EOF
+        docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASS} ${CI_REGISTRY}
+        docker rm -f django.nv
+        docker pull ${CI_REGISTRY}/root/django-nv
+        docker run -d --name django.nv -p 8000:8000 ${CI_REGISTRY}/root/django-nv
+      EOF
+  ```
