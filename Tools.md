@@ -23,7 +23,7 @@ Registry - place to store and retreive docker image
 Repository - place to store a particular image and its version in a registry
 ```
 
->SCA
+>SCA (OAST)
 ```bash
 Software Component Analysis is a software technique to find security vulns in third-party projects
 Static Analysis technique aka Software Component Analysis
