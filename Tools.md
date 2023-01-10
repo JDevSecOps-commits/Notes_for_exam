@@ -28,6 +28,8 @@ Repository - place to store a particular image and its version in a registry
 Software Component Analysis is a software technique to find security vulns in third-party projects
 Static Analysis technique aka Software Component Analysis
 
+Used oon third-party components, internal developed components and docker containers
+
 **SCA Tools**
 
 retirejs
@@ -37,7 +39,18 @@ retirejs
   
   >Backend
   safety - docker run --rm -v $(pwd):/src hysnsec/safety check -r requirements.txt --json > oast-results.json
-  
+ >
+ 
+Safety
+  >
+  >
+Blunder Audit
+  >
+  ?
+  >
+Compsoer
+>
+?
 >
 ```
 
