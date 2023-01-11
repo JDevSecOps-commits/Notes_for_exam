@@ -38,6 +38,11 @@ Repository - place to store a particular image and its version in a registry
 Software Component Analysis is a software technique to find security vulns in third-party projects
 Static Analysis technique aka Software Component Analysis
 
+Strengths - Less false positvies than SAST
+Weaknesses - Uses checksums of files and packages to find vulns. Not fit for internal or non-analysed compontnet by the vendor
+Threats - False positives and license checks can be vague.
+Opportunites - Ability to scan code to see if can be improved
+
 Used on third-party components, internal developed components and docker containers
 
 **SCA Tools**
