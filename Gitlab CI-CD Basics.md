@@ -10,6 +10,29 @@ git add upload-results.py
 git commit -m "Add upload-results.py file"
 ```
 
+# GitLab CI/CD Advanced
+To Fail a build
+```bash
+- exit 1 - fails a build
+allow_failure: true (allows the build to fail)
+```
+
+# Save the results
+```bash
+artifacts:                    # <--- To save results, we use artifacts tag
+    paths:                      # <--- We then give the path/paths of the scan result files we want to store for further processing
+    - vulnerabilities.json                  #<--- The filename
+    expire_in: 1 week 
+ ```
+# Continous Delivery
+```bash
+when: manual
+```
+
+# Conditional Pipelines
+```bash
+
+
 # YAML File
 ```bash
 # This is how a comment is added to a YAML file; please read them carefully.
