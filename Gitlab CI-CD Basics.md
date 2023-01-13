@@ -40,6 +40,9 @@ Rules - changes - if contents of a file has changed
 #ules - exists - if a certain file exists
 
 Rules - allow_failure - allows the job to fail
+
+```
+
 # YAML File
 ```bash
 # This is how a comment is added to a YAML file; please read them carefully.
