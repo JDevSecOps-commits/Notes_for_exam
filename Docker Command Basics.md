@@ -1,84 +1,83 @@
 # DevSecOps-Pro
 Notes for future / Exam
-> Pull image from DockerHub
+#  Pull image from DockerHub
 ```bash
 docker pull ubuntu
 ```
-> Hide output using -q 
+# Hide output using -q 
 ```bash
 docker pull -q alpine
 ```
 
-> Start container from docker image
-```bash
+# Start container from docker image``bash
 docker run -d --name myubuntu ubuntu
 ```
-> List docker container
+# List docker container
 ```bash
 docker ps
 ```
 
-> to keep docker container running
+# to keep docker container running
 ```bash
 docker run -d --name myubuntu -i ubuntu
 ```
 
-> remove docker container 
+# remove docker container 
 ```bash
 docker rm myubuntu
 ```
-> run command inside a container using exec
+#  run command inside a container using exec
 ```bash
 docker exec myubuntu whoami
 docker exec -it myubuntu bash
 docker exec myubuntu cat /etc/lsb-release
 ```
->stop and start docker container
+# stop and start docker container
 ```bash
 docker stop webserver && docker rm webserver
 ```
-> Check Docker Status
+# Check Docker Status
 ```bash
 docker ps -a
 ```
-> Show processes running inside a container 
+# Show processes running inside a container 
 ```bash
 docker top myubuntu
 ```
-> Download Source Code
+# Download Source Code
 ```bash 
 git clone https://gitlab.practical-devsecops.training/pdso/django.nv.git
 ```
-> Build Docker Image
+# Build Docker Image
 ```bash
 docker build -t django.nv:1.0 .
 ```
-> See Docker Imager
+# See Docker Imager
 ```bash
 docker images
 ```
-> docker rename images
+# docker rename images
 ```bash
 docker tag django.nv:1.0 django.nv:1.1
 ```
-> Manage Volune of docker container
+# Manage Volune of docker container
 ```bash
 docker volume --help
 ```
-> List available volumes on your system
+# List available volumes on your system
 ```bash
 docker volume ls
 ```
-> Create a new volume
+# Create a new volume
 ```bash
 docker volume create data
 ```
-> run a contaner with file
+# run a contaner with file
 ```bash
 docker run --name volumemount -v data:/src ubuntu:18.04 "/bin/bash" "-c" "echo test>>/src/hello.txt"
 ```
 
-> Login to docker when using Gitlab
+# Login to docker when using Gitlab
 ```bash
 release:
   stage: release
@@ -89,7 +88,7 @@ release:
    - docker push $CI_REGISTRY/root/django-nv         # Push the image into registry
 ```
 
-> SSh into prod machine and set up Docker
+# SSh into prod machine and set up Docker
 ```bash
 prod:
   stage: prod
@@ -114,3 +113,57 @@ prod:
         docker run -d --name django.nv -p 8000:8000 ${CI_REGISTRY}/root/django-nv
       EOF
   ```
+
+# Help commands
+```bash
+docker network --help
+```
+# to see available networks
+```bash
+docker network ls
+```
+# create new network
+```bash
+docker network create mynetwork
+```
+# explore more details of a network
+```bash
+docker inspect mynetwork
+```
+
+# attach network to a container
+```bash
+docker run -d --name ubuntu --network mynetwork -it ubuntu:18.04
+```
+# removing a network 
+```bash
+docker network rm mynetwork
+```
+# create macvlan network 
+```bash
+docker network create --driver macvlan mymacvlan
+```
+
+# this network disables networks inside container
+```bash
+docker run -d --name ubuntu --network=none -it ubuntu:18.04
+```
+# Create a network with subnet
+```bash
+docker network create app --subnet "172.10.2.0/16"
+```
+# connect app to a network
+```bash
+docker network connect app myubuntu
+```
+# Dockerfile
+```bash
+cat > Dockerfile <<EOL
+FROM ubuntu:18.04
+
+RUN apt update && apt install nginx -y
+
+CMD ["/bin/bash", "-c" , "service nginx start"]
+CMD [";sleep infinity"]
+EOL
+```
