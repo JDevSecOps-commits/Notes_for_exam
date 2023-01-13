@@ -102,3 +102,17 @@ Add keys to known_hosts file
 ```bash
 ssh-keyscan -t rsa prod-xcs30z62 >> ~/.ssh/known_hosts
 ```
+
+# jq
+```bash
+jq '.' learnjq.json
+
+jq '.[] | .details' learnjq.json
+jq '.[] | {name: .details.name, url:.details.url}' learnjq.json
+jq '.[1] | {name: .details.name, url: .details.url}' learnjq.json
+jq '[.[] | {name: .details.name, url: .details.url}]' learnjq.json
+jq '.[] | {name: .details.name, url: .details.url, services: .services[]}' learnjq.json
+jq '.[] | {name: .details.name, url: .details.url, services: [.services[]]}' learnjq.json
+jq '.[] | {name: .details.name, servicecount: .services | length}' learnjq.json
+jq '.[] | select(.details.name=="AWS")' learnjq.json
+
