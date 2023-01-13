@@ -40,3 +40,22 @@ mkdir
 ```bash
 nano
 ```
+
+> Save output to file
+```bash
+cat /etc/passwd > mypasswd.txt
+```
+
+> Append to exisitng file (add new content to file)
+```bash
+cat /etc/passwd >> mypasswd.txt
+```
+
+> Extract content from file
+```bash
+cat mypasswd.txt | cut -d ':' -f 1
+Behind the scenes, the cat command’s output was sent to the cut command as an input, and it used -d (delimiter) flag with a colon as a separator/delimiter and -f (field) option to get the 1st field.
+
+-d - delimter flag 
+-f - field (to get first field)
+```
