@@ -17,3 +17,17 @@ npm install -g retire@3.0.6
 ```bash
 retire --outputformat json --outputpath retire_output.json
 ```
+>Embed retirejs
+```bash
+oast-frontend:
+ stage: test
+ image: node:alpine3.10
+ script:
+   - npm install
+   - npm install -g retire
+   - retire --outputformat json --outputpath retirejs-report.json --severity high
+ artifacts:
+   paths: [retirejs-report.json]
+   when: always
+   expire_in: one week # Optional
+```
