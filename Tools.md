@@ -70,3 +70,7 @@ docker run --rm -v $(pwd):/tmp hysnsec/nmap prod-xcs30z62 -oX /tmp/nmap-output.x
 docker run --user $(id -u):$(id -g) -w /zap -v $(pwd):/zap/wrk:rw --rm owasp/zap2docker-stable:2.10.0 zap-baseline.py -t https://prod-xcs30z62.lab.practical-devsecops.training -J zap-output.json
 
 
+>IaC
+```bash
+Ansible
+
