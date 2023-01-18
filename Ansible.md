@@ -69,4 +69,79 @@ ansible-playbook -i inventory.ini playbook.yml
 ```bash
 ssh-keyscan -t rsa sandbox-z3l8hs55 devsecops-box-z3l8hs55 >> ~/.ssh/known_hosts
 ```
+>Yml File
+```bash
+cat > tasks/main.yml <<EOL
+---
+- name: Install nginx
+  apt:
+    name: nginx
+    state: present
+    update_cache: true
 
+- name: Copy the configuration
+  template:
+    src: templates/default.j2
+    dest: /etc/nginx/sites-enabled/default
+
+- name: Start nginx service
+  service:
+    name: nginx
+    state: started
+    enabled: yes
+
+- name: Clone django repository
+  git:
+    repo: https://gitlab.practical-devsecops.training/pdso/django.nv.git
+    dest: /opt/django
+
+- name: Install dependencies
+  command: pip3 install -r requirements.txt
+  args:
+    chdir: /opt/django
+
+- name: Database migration
+  command: python3 manage.py migrate
+  args:
+    chdir: /opt/django
+
+- name: Load data from the fixtures
+  command: python3 manage.py loaddata fixtures/*
+  args:
+    chdir: /opt/django
+
+- name: Run an application in the background
+  shell: nohup python3 manage.py runserver 0.0.0.0:8000 &
+  args:
+    chdir: /opt/django
+EOL
+```
+
+>Adjust remote machine
+```bash
+cat > templates/default.j2 <<EOL
+{% raw %}
+server {
+    listen      80;
+    server_name localhost;
+
+    access_log  /var/log/nginx/django_access.log;
+    error_log   /var/log/nginx/django_error.log;
+
+    proxy_buffers 16 64k;
+    proxy_buffer_size 128k;
+
+    location / {
+        proxy_pass  http://localhost:8000;
+        proxy_next_upstream error timeout invalid_header http_500 http_502 http_503 http_504;
+        proxy_redirect off;
+
+        proxy_set_header    Host \$host;
+        proxy_set_header    X-Real-IP \$remote_addr;
+        proxy_set_header    X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header    X-Forwarded-Proto http;
+    }
+}
+{% endraw %}
+EOL
+```
