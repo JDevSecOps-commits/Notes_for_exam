@@ -175,3 +175,8 @@ retry_files_enabled = False
 inventory = /inventory.ini
 EOF
 ```
+
+>Copy files
+```bash
+ansible -i inventory.ini all -m copy -a "src=/root/notes dest=/root"
+```
