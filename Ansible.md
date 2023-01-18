@@ -180,3 +180,8 @@ EOF
 ```bash
 ansible -i inventory.ini all -m copy -a "src=/root/notes dest=/root"
 ```
+
+>Install module via Ansible
+```bash
+ansible -i inventory.ini prod -m apt -a "name=ntp state=present"
+```
