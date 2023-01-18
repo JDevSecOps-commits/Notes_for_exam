@@ -69,7 +69,7 @@ ansible-playbook -i inventory.ini playbook.yml
 ```bash
 ssh-keyscan -t rsa sandbox-z3l8hs55 devsecops-box-z3l8hs55 >> ~/.ssh/known_hosts
 ```
->Yml File
+>Yaml File
 ```bash
 cat > tasks/main.yml <<EOL
 ---
@@ -143,5 +143,19 @@ server {
     }
 }
 {% endraw %}
+EOL
+```
+
+>File to use main.yml
+```bash
+cat > main.yml <<EOL
+---
+- name: Simple playbook
+  hosts: sandbox
+  remote_user: root
+  gather_facts: no
+
+  tasks:
+  - include: tasks/main.yml
 EOL
 ```
