@@ -159,3 +159,19 @@ cat > main.yml <<EOL
   - include: tasks/main.yml
 EOL
 ```
+
+>Create cfg in Ansible
+```bash
+
+mkdir /etc/ansible/
+
+
+cat > /etc/ansible/ansible.cfg <<EOF
+[defaults]
+stdout_callback = yaml
+deprecation_warnings = False
+host_key_checking = False
+retry_files_enabled = False
+inventory = /inventory.ini
+EOF
+```
