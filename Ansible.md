@@ -185,3 +185,29 @@ ansible -i inventory.ini all -m copy -a "src=/root/notes dest=/root"
 ```bash
 ansible -i inventory.ini prod -m apt -a "name=ntp state=present"
 ```
+
+
+
+
+
+>Ansible Hardening
+```bash
+cat > /hardening/ansible-hardening.yml <<EOL
+---
+- name: Playbook to harden Ubuntu OS.
+  hosts: prod
+  remote_user: root
+  become: yes
+
+  roles:
+    - dev-sec.os-hardening
+
+EOL
+```
+
+>Dev-Sec Hardening
+```bash
+ansible-galaxy install dev-sec.os-hardening
+
+ansible-playbook -i /hardening/inventory.ini /hardening/ansible-hardening.yml
+```
