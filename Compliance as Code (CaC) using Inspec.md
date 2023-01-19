@@ -74,3 +74,12 @@ inspec:
     when: always
     
  ```
+ >Prevent SSH KEY
+ ```bash
+ echo "StrictHostKeyChecking accept-new" >> ~/.ssh/config
+ ```
+ 
+ >SSH Inspec
+ ```bash
+ inspec exec https://github.com/dev-sec/linux-baseline -t ssh://root@prod-xcs30z62 -i ~/.ssh/id_rsa --chef-license accept
+ ```
