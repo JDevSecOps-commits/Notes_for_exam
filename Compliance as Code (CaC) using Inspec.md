@@ -83,3 +83,29 @@ inspec:
  ```bash
  inspec exec https://github.com/dev-sec/linux-baseline -t ssh://root@prod-xcs30z62 -i ~/.ssh/id_rsa --chef-license accept
  ```
+ 
+ >Create Inspec Profile
+ ```bash
+ inspec init profile ubuntu --chef-license accept
+ ```
+ 
+ >Edit Inspec profile
+ ```bash
+ cat >> ubuntu/controls/example.rb <<EOL
+describe file('/etc/shadow') do
+    it { should exist }
+    it { should be_file }
+    it { should be_owned_by 'root' }
+  end
+EOL
+```
+
+>Validate errors
+```bash
+inspec check ubuntu
+```
+
+>Run inspec profile against server
+```bash
+echo "StrictHostKeyChecking accept-new" >> ~/.ssh/config
+inspec exec ubuntu -t ssh://root@prod-xcs30z62 -i ~/.ssh/id_rsa --chef-license acceptinspec exec ubuntu -t ssh://root@prod-xcs30z62 -i ~/.ssh/id_rsa --chef-license accept
