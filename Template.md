@@ -128,3 +128,4 @@ zap-baseline:
  ```bash
  docker run --rm -v ~/.ssh:/root/.ssh -v $(pwd):/share hysnsec/inspec exec https://github.com/dev-sec/linux-baseline -t ssh://root@$DEPLOYMENT_SERVER -i /root/.ssh/id_rsa --chef-license accept --reporter json:/share/inspec-output.json
  ```
+https://linux-audit.com/linux-systems-guide-to-achieve-pci-dss-compliance-and-certification/
