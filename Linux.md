@@ -115,4 +115,5 @@ jq '.[] | {name: .details.name, url: .details.url, services: .services[]}' learn
 jq '.[] | {name: .details.name, url: .details.url, services: [.services[]]}' learnjq.json
 jq '.[] | {name: .details.name, servicecount: .services | length}' learnjq.json
 jq '.[] | select(.details.name=="AWS")' learnjq.json
+cat bandit-output.json | jq .metrics._totals.'"CONFIDENCE.HIGH"'
 
