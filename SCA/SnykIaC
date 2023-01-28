@@ -1,0 +1,11 @@
+Install snyk
+`wget -O /usr/local/bin/snyk https://github.com/snyk/snyk/releases/download/v1.573.0/snyk-linux`  
+give executable to snyk binary `chmod +x /usr/local/bin/snyk` 
+ 
+Get Snyk token from account settings (signed in with github)  
+`snyk auth API_TOKEN_HERE`  
+Also export it as env variable
+`export SNYK_TOKEN=API_TOKEN_HERE`
+
+`snyk iac --help`  
+`snyk iac test aws --json > snyk_output.json` (aws just a folder name)
