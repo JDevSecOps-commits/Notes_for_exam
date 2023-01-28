@@ -1,0 +1,489 @@
+image: docker:latest
+
+services:
+  - docker:dind
+
+stages:
+  - build
+  - test
+  - release
+  - preprod
+  - validate
+  - integration
+  - prod
+
+# Useful keywords
+# only:
+#   - master # Only changes on master branch
+
+build:
+  stage: build
+  image: python:3.6
+  before_script:
+   - pip3 install --upgrade virtualenv
+  script:
+   - virtualenv env                       # Create a virtual environment for the python application
+   - source env/bin/activate              # Activate the virtual environment
+   - pip install -r requirements.txt      # Install the required third party packages as defined in requireme>
+   - python manage.py check               # Run checks to ensure the application is working fine
+
+test:
+  stage: test
+  image: python:3.6
+  before_script:
+   - pip3 install --upgrade virtualenv
+  script:
+   - virtualenv env
+   - source env/bin/activate
+   - pip install -r requirements.txt
+   - python manage.py test taskManager  
+
+git:
+  stage: test
+  image: bitnami/git
+  script:
+   - git clone https://github.com/nodejs/node.git
+  
+## SCA -------------------------------------------------------------------------------------------------------------------
+safety:
+  stage: test
+  script:
+    # We are going to pull the hysnsec/safety image to run the safety scanner
+    - docker pull hysnsec/safety
+    # third party components are stored in requirements.txt for python, so we will scan this particular file with safety.
+    - docker run --rm -v $(pwd):/src hysnsec/safety check -r requirements.txt --json > oast-results.json
+  artifacts:
+    paths: [oast-results.json]
+    when: always # What does this do?
+  allow_failure: true
+    
+retirejs:
+  stage: test
+  image: node:alpine3.10
+  script:
+    - npm install
+    - npm install -g retire
+    - retire --outputformat json --outputpath retirejs-report.json --severity high
+  artifacts:
+    paths: [retirejs-report.json]
+    when: always
+    expire_in: one week # Optional
+
+retirejs_docker:
+  stage: test
+  script:
+    - docker pull gruebel/retirejs
+    - docker run --rm -v $PWD:/app gruebel/retirejs:latest --outputformat json --outputpath /app/retirejs-report.json
+  artifacts:
+    paths: [retirejs-report.json]
+    when: always
+    expire_in: one week # Optional
+    
+dependency-check:
+  stage: test
+  image: gitlab/dind:latest
+  script:
+    - chmod +x ./run-depcheck.sh
+    - ./run-depcheck.sh
+  artifacts:
+    paths:
+      - reports/dependency-check-report.csv
+    when: always
+    expire_in: one week
+    
+# ADD SNYK_TOKEN to variables in gitlab. IDK if they give you one or they might ask you to get a free one from snyk website
+snyk:
+  stage: test
+  image: node:latest
+  before_script:
+    - wget -O snyk https://github.com/snyk/snyk/releases/download/v1.566.0/snyk-linux
+    - chmod +x snyk
+    - mv snyk /usr/local/bin/
+  script:
+    - npm install
+    - snyk test --json > snyk-results.json
+  artifacts:
+    paths:
+    - snyk-results.json
+    expire_in: one week
+  allow_failure: true
+  
+# make sure this is running on webapp repo and not django. Otherwise no results
+npm_audit:
+  stage: test
+  script:
+    - npm audit --json | tee npm_results.json
+  artifacts:
+    paths: [npm_results.json]
+    when: always
+    expire_in: one week # Optional
+    
+auditjs:
+  image: docker:dind
+  stage: test
+  script:
+    - docker run --rm -v $(pwd):/src -w /src hysnsec/auditjs ossi -q -j | tee auditjs-output.json
+  artifacts:
+    paths: [auditjs-output.json]
+    when: always # What is this for?
+    expire_in: one week
+  allow_failure: true
+
+bundler-audit:
+  stage: test
+  script:
+    - docker pull hysnsec/bunder-audit
+    - docker run --rm -v $(pwd):/src -w /src hysnsec/bundler-audit ossi -q -j | tee bundler-audit-output.json
+  artifacts:
+    paths: [bundler-audit-output.json]
+    when: always # What is this for?
+    expire_in: one week
+  allow_failure: true
+  
+# NOTE: Needs a Gemfile.lock file
+chelsea:
+  stage: test
+  script:
+    - docker pull ruby:2.6.6
+    - docker run -v $PWD:/app -w /app ruby:2.6.6 /bin/bash -c "gem install chelsea && chelsea -f Gemfile.lock -t json | tail -n1 > chelsea-output.json"
+  artifacts:
+    paths: [chelsea-output.json]
+    when: always # What is this for?
+    expire_in: one week
+  allow_failure: true 
+  
+# SAST -------------------------------------------------------------------------------------------------------------------  
+trufflehog:
+  stage: build
+  script:
+    - docker run -v $(pwd):/src --rm hysnsec/trufflehog --repo_path /src file:///src --json | tee trufflehog-output.json
+  artifacts:
+    paths: [trufflehog-output.json]
+    when: always  # What is this for?
+    expire_in: one week
+
+bandit:
+  stage: build
+  script:
+    - docker pull hysnsec/bandit  # Download bandit docker container
+    # Run docker container, please refer docker security course, if this doesn't make sense to you.
+    - docker run --user $(id -u):$(id -g) -v $(pwd):/src --rm hysnsec/bandit -r /src -f json -o /src/bandit-output.json
+  artifacts:
+    paths: [bandit-output.json]
+    when: always
+  allow_failure: true   #<--- allow the build to fail but don't mark it as such
+  
+gosec:
+  stage: build
+  script:
+    - docker run --rm -v $(pwd):/src -w /src securego/gosec -fmt json -out gosec-output.json ./...
+  artifacts:
+    paths: [gosec-output.json]
+    when: always
+  allow_failure: true
+
+njsscan:
+  stage: build
+  script:
+    - docker pull opensecurity/njsscan
+    - docker run -v $PWD:/njs -w /njs opensecurity/njsscan --json -o njsscan.json /njs
+  artifacts:
+    paths: [njsscan.json]
+    when: always
+  allow_failure: true 
+
+# see https://github.com/hadolint/hadolint/blob/master/docs/INTEGRATION.md
+docker-hadolint:
+  stage: build
+  image: hadolint/hadolint:latest-debian
+  script:
+    - mkdir -p reports
+    - hadolint -f gitlab_codeclimate Dockerfile > reports/hadolint-$(md5sum Dockerfile | cut -d" " -f1).json
+  artifacts:
+    name: "$CI_JOB_NAME artifacts from $CI_PROJECT_NAME on $CI_COMMIT_REF_SLUG"
+    expire_in: 1 day
+    when: always
+    reports:
+      codequality:
+        - "reports/*"
+    paths:
+      - "reports/*"
+ 
+# Needs vars, see https://semgrep.dev/for/gitlab
+semgrep:
+  stage: build
+  image: returntocorp/semgrep
+  script: semgrep ci
+  rules:
+  - changes:
+      - .gitlab-ci.yml
+  - if: $CI_PIPELINE_SOURCE == "web"  # allow triggering a scan manually from the gitlab UI
+  - if: $CI_MERGE_REQUEST_IID
+  
+  variables:
+    SEMGREP_RULES: >- # more at semgrep.dev/r
+      p/security-audit
+      p/secrets
+    SEMGREP_APP_TOKEN: $SEMGREP_APP_TOKEN
+  
+# Semgrep useful commands: 
+# semgrep --lang python -e "os.system(...)" . --json | jq
+# semgrep --lang python -e "DEBUG =True" --include settings.py .
+# semgrep --lang python -e '$X = $Y' .
+# semgrep --lang python -e '$FUNC(request)' .
+
+semgrep_no_api:
+  stage: build
+  before_script:
+    - apt get -q install jq 
+  script:
+    - docker pull returntocorp/semgrep
+    - docker run --rm -v $PWD:/src -w /src returntocorp/semgrep semgrep --lang python -e "os.system(...)" . --json | jq > semgrep-output.json
+  artifacts:
+    paths: [semgrep-output.json]
+    when: always
+
+  # Setup inline MR comments:
+  # https://semgrep.dev/docs/semgrep-app/notifications/#enabling-gitlab-merge-request-comments
+  
+# Need to add secrets to gitlab
+#  sonarqube:
+#    runs-on: ubuntu-20.04
+#    steps:
+#    - uses: actions/checkout@v2
+#      with:
+#        fetch-depth: 0
+#    - name: SonarQube Scan
+#      uses: sonarsource/sonarqube-scan-action@master
+#      env:
+#        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+#        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+#      with:
+#        projectBaseDir: .
+#       args: >
+#         -Dsonar.projectKey=Django
+
+# Requires adding some vars, see https://docs.sonarqube.org/9.6/devops-platform-integration/gitlab-integration/#:~:text=SonarQube%27s%20integration%20with%20GitLab%20Self,SonarQube%20with%20your%20GitLab%20credentials.
+sonarqube-check:
+  image:
+    name: sonarsource/sonar-scanner-cli:latest
+    entrypoint: [""]
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
+    GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  script:
+    - sonar-scanner -Dsonar.qualitygate.wait=true
+  allow_failure: true
+  only:
+    - merge_requests
+    - master # or the name of your main branch
+    - develop
+
+# need to clone webapp and cd into it for this example to work 
+# Change taskManager/* if in another repo or want to scan something else
+# docker run --rm -v $(pwd):/data -w /data cytopia/pylint --rcfile .pylintrc --output
+pylint:
+  stage: build
+  script:
+    - docker pull python:3.6
+    - docker run -it -v $(pwd):/pylint -w /pylint python:3.6-slim-bullseye /bin/sh -c "pip3 install pylint && pylint taskManager/*.py -f json | tee pylint-output.json"
+  artifacts:
+    paths: [pylint-output.json]
+    when: always
+    expire_in: one week # Optional
+
+pylint_in_image:
+  stage: build
+  image: python3.6
+  script:
+    - pip3 install pylint
+    - pylint taskManager/*.py -f json | tee pylint-output.json
+  artifacts:
+    paths: [pylint-output.json]
+    when: always
+    expire_in: one week # Optional
+
+# also requires webapp 
+brakeman:
+  stage: test
+  image: node:alpine3.10
+  before_script:
+    - apt update
+    - apt install ruby-full -y
+    - gem install brakeman -v 5.2.1
+  script:
+    - brakeman -f json | tee brakeman-report.json
+  artifacts:
+    paths: [brakeman-report.json]
+    when: always
+    expire_in: one week # Optional
+
+dastardly:
+  stage: test
+  script: 
+    - docker pull public.ecr.aws/portswigger/dastardly
+    - docker run --user $(id -u) --rm -v $(pwd):/dastardly -e DASTARDLY_TARGET_URL=https://prod-xioqjd4c.lab.practical-devsecops.training -e DASTARDLY_OUTPUT_FILE=/dastardly/dastardly-report.xml public.ecr.aws/portswigger/dastardly
+  artifacts:
+    paths: [dastardly-report.xml]
+    when: always
+
+#DAST ------------------------------------------------------------------------------------------------------------------------------
+nikto:
+  stage: integration
+  script:
+    - docker pull hysnsec/nikto
+    - docker run --rm -v $(pwd):/tmp hysnsec/nikto -h http://prod-xioqjd4c.lab.practical-devsecops.training -o /tmp/nikto-output.xml
+  artifacts:
+    paths: [nikto-output.xml]
+    when: always
+  allow_failure: true
+
+sslscan:
+  stage: integration
+  script:
+    - docker pull hysnsec/sslyze
+    - docker run --rm -v $(pwd):/tmp hysnsec/sslyze prod-xioqjd4c.lab.practical-devsecops.training:443 --json_out /tmp/sslyze-output.json
+  artifacts:
+    paths: [sslyze-output.json]
+    when: always
+  allow_failure: true
+
+nmap:
+  stage: integration
+  script:
+    - docker pull hysnsec/nmap
+    - docker run --rm -v $(pwd):/tmp hysnsec/nmap prod-xioqjd4c -oX /tmp/nmap-output.xml
+  artifacts:
+    paths: [nmap-output.xml]
+    when: always
+  allow_failure: true
+
+zap-baseline:
+  stage: integration
+  before_script:
+    - docker pull owasp/zap2docker-stable:2.10.0
+  script:
+    - docker run --user $(id -u):$(id -g) -w /zap -v $(pwd):/zap/wrk:rw --rm owasp/zap2docker-stable:2.10.0 zap-baseline.py -t https://prod-xioqjd4c.lab.practical-devsecops.training -J zap-output.json
+  after_script:
+    - docker rmi owasp/zap2docker-stable:2.10.0  # clean up the image to save the disk space
+  artifacts:
+    paths: [zap-output.json]
+    when: always        # What does this do?
+  allow_failure: false  # Optional
+
+# IaC etc -----------------------------------------------------
+# 
+ansible-hardening:
+  stage: prod
+  image: willhallonline/ansible:2.9-ubuntu-18.04
+  before_script:
+    - mkdir -p ~/.ssh
+    - echo "$DEPLOYMENT_SERVER_SSH_PRIVKEY" | tr -d '\r' > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - eval "$(ssh-agent -s)"
+    - ssh-add ~/.ssh/id_rsa
+    - ssh-keyscan -t rsa $DEPLOYMENT_SERVER >> ~/.ssh/known_hosts
+  script:
+    - echo -e "[prod]\n$DEPLOYMENT_SERVER" >> inventory.ini
+    - ansible-galaxy install dev-sec.os-hardening
+    - ansible-playbook -i inventory.ini ansible-hardening.yml
+  
+# Add DEPLOYMENT_SERVER (prod-ID) and DEPLOYMENT_SERVER_SSH_PRIVKEY to gitlab variable at
+# settings > CI/CD > Variables
+# Get Privkey ssh root@prod-xioqjd4c cat ~/.ssh/id_rsa
+inspec:
+  stage: prod
+  only:
+    - "master"
+  environment: production
+  before_script:
+    - mkdir -p ~/.ssh
+    - echo "$DEPLOYMENT_SERVER_SSH_PRIVKEY" | tr -d '\r' > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - eval "$(ssh-agent -s)"
+    - ssh-add ~/.ssh/id_rsa
+    - ssh-keyscan -t rsa $DEPLOYMENT_SERVER >> ~/.ssh/known_hosts
+  script:
+    - docker run --rm -v ~/.ssh:/root/.ssh -v $(pwd):/share hysnsec/inspec exec https://github.com/dev-sec/linux-baseline -t ssh://root@$DEPLOYMENT_SERVER -i ~/.ssh/id_rsa --chef-license accept --reporter json:inspec-output.json
+  artifacts:
+    paths: [inspec-output.json]
+    when: always
+    
+checkov:
+  stage: validate
+  script:
+    - docker pull bridgecrew/checkov
+    - docker run --rm -w /src -v $(pwd):/src bridgecrew/checkov -d aws -o json | tee checkov-output.json
+  artifacts:
+    paths: [checkov-output.json]
+    when: always
+  allow_failure: true
+  
+terrascan:
+  stage: validate
+  image:
+    name: accurics/terrascan:latest
+    entrypoint: ["/bin/sh", "-c"]
+  script:
+    - /go/bin/terrascan scan . -o json > terrascan-output.json
+  artifacts:
+    paths: [terrascan-output.json]
+    when: always
+  allow_failure: true
+
+terrascan_docker_version:
+  stage: validate
+  script: 
+    - docker pull tenable/terrascan
+    # Can use | tee terrascan-output.json but it will clog up the feed. Better to use >
+    - docker run --rm -it -v $(pwd):/iac -w /iac tenable/terrascan scan -o json > terrascan-output.json
+  artifacts:
+    paths: [terrascan-output.json]
+    when: always
+
+tfsec:
+  stage: validate
+  script:
+    - docker run --rm -v $(pwd):/src aquasec/tfsec /src -f json > tfsec-output.json
+  artifacts:
+    paths: [tfsec-output.json]
+    when: always
+  allow_failure: true
+
+# Vuln Management ------------------------------------------------
+# REQUIRES THE UPLOAD SCRIPT BE ADDED TO THE GITLAB FIRST.
+# REQUIRES DOJO_HOST AND DOJO_API_TOKEN variables added
+sast:
+  stage: build
+  before_script:
+    - apk add py-pip py-requests
+  script:
+    - docker pull hysnsec/bandit  # Download bandit docker container
+    - docker run --user $(id -u):$(id -g) -v $(pwd):/src --rm hysnsec/bandit -r /src -f json -o /src/bandit-output.json
+  after_script:
+    - python3 upload-results.py --host $DOJO_HOST --api_key $DOJO_API_TOKEN --engagement_id 1 --product_id 1 --lead_id 1 --environment "Production" --result_file bandit-output.json --scanner "Bandit Scan"
+  artifacts:
+    paths: [bandit-output.json]
+    when: always
+
+# Conditional fail example
+secrets-scanning:
+  stage: build
+  before_script:
+    - apk add jq
+  script:
+    - docker pull hysnsec/detect-secrets
+    - docker run --user $(id -u):$(id -g) -v $(pwd):/src --rm -w /src hysnsec/detect-secrets scan | tee secrets-output.json
+    - cat secrets-output.json | jq .results | jq length
+    - len=$(jq '.results | length' secrets-output.json)
+    - if [ $len -gt 0 ]; then exit 1; fi
+  artifacts:
+    paths: [secrets-output.json]
+    when: always
+  allow_failure: false 
+  
+ # .dummy.'"FOR.ATTRIBUTES.WITH.USETHESEQUOTATIONS"'
